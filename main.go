@@ -14,17 +14,24 @@ type URL struct {
 func shortenURL(c *gin.Context) {
 	var req URL
 
-	if req.OriginalUrl == "" {
-		c.JSON(400, gin.H{"error": "url can't be an empty string"})
-	}
-
 	err := c.ShouldBindJSON(&req)
+	url := req.OriginalUrl
+
 	if err != nil {
 		c.JSON(400, gin.H{"error": "invalid request"})
 		return
 	}
 
-	url := req.OriginalUrl
+	if req.OriginalUrl == "" {
+		c.JSON(400, gin.H{"error": "url can't be an empty string"})
+		return
+	}
+
+	if !IsValidURL(req.OriginalUrl) || !IsURLLive(req.OriginalUrl) {	
+		c.JSON(400, gin.H{"error": "url invalid"})
+		return
+	}
+
 	// pretend we did a process that shortened the url
 	url = "short678"
 
