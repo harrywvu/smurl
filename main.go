@@ -39,12 +39,16 @@ func shortenURL(c *gin.Context) {
 }
 
 func main() {
-	router := gin.Default()
+	r := gin.Default()
 
 	// take original url and return the shortened url
-	router.POST("/shorten", shortenURL)
+	// router.POST("/shorten", shortenURL)
 
 	// router.GET()
 
-	router.Run()
+	r.GET("/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	r.Run()
 }
