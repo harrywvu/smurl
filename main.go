@@ -8,26 +8,26 @@ import (
 )
 
 type URL struct {
-	OriginalUrl string `json:"OriginalUrl"`
+	OriginalURL string `json:"OriginalUrl"`
 }
 
 func shortenURL(c *gin.Context) {
 	var req URL
 
 	err := c.ShouldBindJSON(&req)
-	url := req.OriginalUrl
+	url := req.OriginalURL
 
 	if err != nil {
 		c.JSON(400, gin.H{"error": "invalid request"})
 		return
 	}
 
-	if req.OriginalUrl == "" {
+	if req.OriginalURL == "" {
 		c.JSON(400, gin.H{"error": "url can't be an empty string"})
 		return
 	}
 
-	if !IsValidURL(req.OriginalUrl) || !IsURLLive(req.OriginalUrl) {	
+	if !IsValidURL(req.OriginalURL) || !IsURLLive(req.OriginalURL) {
 		c.JSON(400, gin.H{"error": "url invalid"})
 		return
 	}
