@@ -54,10 +54,12 @@ func shortenURL(c *gin.Context) {
 
 	created := time.Now().UTC().Format(time.RFC3339)
 
+	generatedCode, _ := newCode()
+	shorturl := "http://localhost:8080/" + generatedCode
 	// placeholder values for now
 	c.JSON(201, gin.H{
-		"code":         "abc1234",
-		"short_url":    "http://localhost:8080/abc1234",
+		"code":         generatedCode,
+		"short_url":    shorturl,
 		"original_url": trimmed,
 		"created_at":   created,
 	})
