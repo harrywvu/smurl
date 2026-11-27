@@ -15,6 +15,8 @@ func newCode() (string, error) {
 	max := big.NewInt(int64(len(charset)))
 
 	for {
+
+		// create the code
 		for i := range b {
 			j, err := rand.Int(rand.Reader, max)
 			if err != nil {
@@ -24,6 +26,8 @@ func newCode() (string, error) {
 		}
 
 		code := string(b)
+
+		// check if its a reserved code
 		if !isReserved(code) {
 			return code, nil
 		}

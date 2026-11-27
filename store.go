@@ -12,6 +12,7 @@ func NewStore() *Store {
 	return &Store{shortURLs: make(map[string]string)}
 }
 
+// create a key-value pair in the store
 func (s *Store) Create(code, url string) bool {
 
 	s.mu.Lock()
@@ -22,22 +23,17 @@ func (s *Store) Create(code, url string) bool {
 		return false
 	}
 
+	// add code in store
 	s.shortURLs[code] = url
 
 	return true
 
 }
 
+// returns the original url from the code = true
 func (s *Store) Resolve(code string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
-	// lookup map, if exists, return url and true
-	// if _, exists := s.shortURLs[code]; exists {
-	// 	return s.shortURLs[code], true
-	// }
-
-	// return "", false
 
 	url, exists := s.shortURLs[code]
 	return url, exists

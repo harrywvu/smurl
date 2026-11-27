@@ -14,7 +14,8 @@ type URL struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func shortenURL(c *gin.Context) {
+func (s *Server) shortenURL(c *gin.Context) {
+	
 	var req URL
 
 	err := c.ShouldBindJSON(&req)
@@ -24,6 +25,7 @@ func shortenURL(c *gin.Context) {
 	}
 
 	trimmed := strings.TrimSpace(req.OriginalURL)
+
 	// validation
 	if trimmed == "" {
 		respondError(c, 400, "invalid_json", "original_url is required")
@@ -36,12 +38,14 @@ func shortenURL(c *gin.Context) {
 	}
 
 	u, err := url.Parse(trimmed)
+
 	if err != nil {
 		respondError(c, 400, "invalid_url", "url can't be parsed")
 		return
 	}
 
 	lowerscheme := strings.ToLower(u.Scheme)
+
 	if lowerscheme != "http" && lowerscheme != "https" {
 		respondError(c, 400, "invalid_url", "url isn't a valid http/https url")
 		return
@@ -54,32 +58,38 @@ func shortenURL(c *gin.Context) {
 
 	created := time.Now().UTC().Format(time.RFC3339)
 
-	generatedCode, err := newCode()
+	for {
+		code, err := newCode()
+
+		if err != nil {
+			respondError(c, 500, "internal_error", "could not generate code")
+			return
+		}
+
+		if !s.store.Create(code, trimmed) {
+			continue
+		}
+
+		shortURL := "http://localhost:8080/" + code
 	
-	if err != nil {
-		respondError(c, 500, "internal_error", "i dont know man	")
+		c.JSON(201, gin.H{
+			"code":         code,
+			"short_url":    shortURL,
+			"original_url": trimmed,
+			"created_at":   created,
+		})
 		return
 	}
-
-	shortURL := "http://localhost:8080/" + generatedCode
-
-	c.JSON(201, gin.H{
-		"code":         generatedCode,
-		"short_url":    shortURL,
-		"original_url": trimmed,
-		"created_at":   created,
-	})
 }
 
 func main() {
 	r := gin.Default()
 
-	// take original url and return the shortened url
-	// router.POST("/shorten", shortenURL)
+	srv := & Server{store: NewStore()}
 
-	// router.GET()
+	r.POST("/api/v1/urls", srv.shortenURL)
+	r.GET("/:code", srv.redirect)
 
-	r.POST("/api/v1/urls", shortenURL)
 
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
