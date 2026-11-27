@@ -82,7 +82,7 @@ func (s *Server) shortenURL(c *gin.Context) {
 	}
 }
 
-func main() {
+func newRouter() *gin.Engine {
 	r := gin.Default()
 
 	srv := & Server{store: NewStore()}
@@ -90,10 +90,13 @@ func main() {
 	r.POST("/api/v1/urls", srv.shortenURL)
 	r.GET("/:code", srv.redirect)
 
-
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	r.Run()
+	return r
+}
+
+func main() {
+	newRouter().Run()
 }
